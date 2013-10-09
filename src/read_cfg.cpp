@@ -19,7 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.        
  */
 
+#include <iostream>
 #include <fstream>
+#include <algorithm>
+
 #include "read_cfg.h"
 
 namespace fpp 
@@ -29,14 +32,25 @@ static std::map<std::string, std::string> m_options;
 
 static void m_parse(std::ifstream & cfgfile)
 {
+    std::string line;
     std::string id, eq, value;
+    size_t pos;
 
-    while (cfgfile >> id >> eq >> value)
+    while (std::getline(cfgfile, line))
     {
-        if (id[0] == '#') 
+        if (line[0] == '#') 
             continue;
-        if (eq != "=") 
+
+        line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+
+        if ((pos = line.find("#")) != std::string::npos) 
+            line = line.substr(0, pos);
+
+        if ((pos = line.find("=")) == std::string::npos)
             continue;
+
+        id = line.substr(0, pos);
+        value = line.substr(pos + 1, line.size() - pos);
 
         m_options[id] = value;
     }
